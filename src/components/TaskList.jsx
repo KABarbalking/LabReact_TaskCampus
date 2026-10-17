@@ -1,10 +1,39 @@
-export default function TaskList({ tareas, onCompletar }) {
+import { useState } from 'react'
+
+export default function TaskList({ tareas = [], onCompletar }) {
+  const [filtro, setFiltro] = useState('todas')
+
+  // Variable derivada para filtrar tareas
+  const tareasFiltradas = tareas.filter((t) => {
+    if (filtro === 'pendientes') return !t.completada
+    if (filtro === 'completadas') return t.completada
+    return true
+  })
+
   return (
-    <section className="card">
-      <h2 className="section-title">Listado de tareas</h2>
-      <ul className="task-list" style={{ listStyle: 'none', padding: 0 }}>
-        {tareas.map((tarea) => (
-          <li key={tarea.id} className="task-item">
+    <div className="card">
+      <h2 className="section-title">Lista de Tareas</h2>
+      
+      {/* Botones de filtro */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+        <button className="task-button" onClick={() => setFiltro('todas')}>
+          Todas
+        </button>
+        <button className="task-button" onClick={() => setFiltro('pendientes')}>
+          Pendientes
+        </button>
+        <button className="task-button" onClick={() => setFiltro('completadas')}>
+          Completadas
+        </button>
+      </div>
+
+      <ul style={{ listStyle: 'none', padding: 0 }}>
+        {tareasFiltradas.map((tarea) => (
+          <li
+            key={tarea.id}
+            className="task-item"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+          >
             <span
               style={{
                 textDecoration: tarea.completada ? 'line-through' : 'none',
@@ -14,18 +43,20 @@ export default function TaskList({ tareas, onCompletar }) {
               {tarea.titulo}
             </span>
             {tarea.completada ? (
-              <span> Completada</span>
+              <span>✅</span>
             ) : (
-              <button
-                className="task-button"
-                onClick={() => onCompletar(tarea.id)}
-              >
+              <button className="task-button" onClick={() => onCompletar(tarea.id)}>
                 Completar
               </button>
             )}
           </li>
         ))}
       </ul>
-    </section>
+
+      {/* Mensaje si no hay tareas en el filtro activo */}
+      {tareasFiltradas.length === 0 && (
+        <p>No hay tareas en esta categoría.</p>
+      )}
+    </div>
   )
 }
