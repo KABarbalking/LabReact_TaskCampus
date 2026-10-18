@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react"
 import Header from "./components/Header"
+import modal from "./components/Modal"
 import TaskList from "./components/TaskList"
 import TaskSummary from "./components/TaskSummary"
 import TaskForm from "./components/TaskForm"
 import "./App.css"
+import Card from "./components/Card"
 
 const App = () => {
   // implementacion del localStorage
@@ -83,9 +85,13 @@ const App = () => {
   return (
     <div className="app-container">
       <Header title="TaskCampus" description="Gestiona tus tareas académicas" />
-      <TaskSummary tareas={tareas} />
+      <Card titulo="Resumen de Tareas"> 
+        <TaskSumary total={tareas.length} />
+      </Card>
       <TaskForm onAgregar={agregarTarea} />
+      <Card titulo='Mis Tareas'>
       <TaskList tareas={tareas} onCompletar={completarTarea} cargando={cargando} error={error} />
+      </Card>
     </div>
   )
 }

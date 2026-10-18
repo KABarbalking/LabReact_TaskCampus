@@ -1,4 +1,7 @@
+import Button from './Button'
+import badge from './Badge'
 import { useState } from 'react'
+import Badge from './Badge'
 
 export default function TaskList({ tareas = [], onCompletar }) {
   const [filtro, setFiltro] = useState('todas')
@@ -16,13 +19,14 @@ export default function TaskList({ tareas = [], onCompletar }) {
       
       {/* Botones de filtro */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-        <button className="task-button" onClick={() => setFiltro('todas')}>
+        // Esta bien profe, le pondre emojis al codigo, solo pongame una buena nota.
+        < button label="📋Todas" onClick={() => setFiltro("todas")} vartiant="primary">
           Todas
         </button>
-        <button className="task-button" onClick={() => setFiltro('pendientes')}>
+        < button label="⏳Pendientes" onClick={() => setFiltro("pendientes")} vartiant="primary">
           Pendientes
         </button>
-        <button className="task-button" onClick={() => setFiltro('completadas')}>
+        < button label="✅Completadas" onClick={() => setFiltro("completadas")} vartiant="primary">
           Completadas
         </button>
       </div>
@@ -40,6 +44,8 @@ export default function TaskList({ tareas = [], onCompletar }) {
                 color: tarea.completada ? '#94a3b8' : 'inherit',
               }}
             >
+              <Badge texto={tarea.completada ? "completada" : "pendiente"} />
+              
               {tarea.titulo}
             </span>
             {tarea.completada ? (
