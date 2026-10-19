@@ -14,11 +14,14 @@ export const postTarea = async (titulo) => {
   return await res.json();
 };
 export const putTarea = async (id, datos) => {
+  if (id > 200) {
+    return datos; // Simulamos éxito inmediato para tareas locales
+  }
   const res = await fetch(`${API_URL}/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(datos),
-  });
+  })
   if (!res.ok) throw new Error("Error al actualizar tarea");
   return await res.json();
 };
