@@ -1,99 +1,105 @@
-import { useState, useEffect } from "react"
-import Header from "./components/Header"
-import modal from "./components/Modal"
-import TaskList from "./components/TaskList"
-import TaskSummary from "./components/TaskSummary"
-import TaskForm from "./components/TaskForm"
-import "./App.css"
-import Card from "./components/Card"
+import { useState, useEffect } from "react";
+import useTareas from "./components/UseTareas";
+import Card from "./components/Card";
+import Header from "./components/Header";
+import Modal from "./components/Modal";
+import TaskList from "./components/TaskList";
+import TaskSummary from "./components/TaskSummary";
+import TaskForm from "./components/TaskForm";
+import "./App.css";
 
 const App = () => {
-  // implementacion del localStorage
-  const [tareas, setTareas] = useState(() => {
-    const guardadas = localStorage.getItem("taskcampus-tareas")
-    return guardadas ? JSON.parse(guardadas) : []
-  })
+  const {
+    tareas,
+    cargando,
+    error,
+    crearTarea,
+    actualizarTarea,
+    eliminarTarea,
+  } = useTareas();
 
-  const [cargando, setCargando] = useState(false)
-  const [error, setError] = useState(null)
+  const [tareaAEliminar, setTareaAEliminar] = useState(null);
 
-  // Si el localStorage está vacío, carga las primeras 10 tareas
+  // NUEVO: estado de filtro levantado a App (lifting state up)
+  const [filtro, setFiltro] = useState("todas");
+
+  // NUEVO: lista filtrada derivada en App (no es otro useState)
+  const tareasFiltradas = tareas.filter((t) => {
+    if (filtro === "completadas") return t.completada;
+    if (filtro === "pendientes") return !t.completada;
+    return true;
+  });
+
+  // Actualiza el título del navegador con las tareas pendientes
   useEffect(() => {
-    const hayDatosLocales = localStorage.getItem("taskcampus-tareas")
-    if (hayDatosLocales) return
+    const pendientes = tareas.filter((t) => !t.completada).length;
+    document.title = `TaskCampus (${pendientes} pendientes)`;
+  }, [tareas]);
 
-    const cargarDesdeAPI = async () => {
-      setCargando(true)
-      try {
-        const response = await fetch("https://jsonplaceholder.typicode.com/todos?_limit=10")
-        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`)
-        const data = await response.json()
-
-        const tareasAdaptadas = data.map((item) => ({
-          id: item.id,
-          titulo: item.title,
-          completada: item.completed,
-        }))
-
-        setTareas(tareasAdaptadas)
-      } catch (err) {
-        setError(err.message)
-      } finally {
-        setCargando(false)
-      }
-    }
-
-    cargarDesdeAPI()
-  }, [])
-
-  // Guarda en localStorage cada vez que las tareas cambian
+  // Temporizador con cleanup para evitar memory leaks
   useEffect(() => {
-    localStorage.setItem("taskcampus-tareas", JSON.stringify(tareas))
-  }, [tareas])
+    const timer = setInterval(() => {
+      console.log("TaskCampus activo");
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
-  // Actualizacion del título del navegador con las tareas pendientes
-  useEffect(() => {
-    const pendientes = tareas.filter((t) => !t.completada).length
-    document.title = `TaskCampus (${pendientes} pendientes)`
-  }, [tareas])
+  const handleAgregarTarea = (titulo) => {
+    crearTarea(titulo);
+  };
 
-  // Agregar tarea nueva
-  const agregarTarea = async (titulo) => {
-    const nuevaTarea = { id: Date.now(), titulo, completada: false }
-    setTareas([...tareas, nuevaTarea])
+  const handleToggleCompletada = (id, completadaActual) => {
+    actualizarTarea(id, { completada: !completadaActual });
+  };
 
-    try {
-      await fetch("https://jsonplaceholder.typicode.com/todos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: titulo, completed: false, userId: 1 }),
-      })
-    } catch (err) {
-      console.error("Error al crear tarea en servidor:", err)
-    }
-  }
-
-  // Marcar tarea como completada
-  const completarTarea = (id) => {
-    setTareas(
-      tareas.map((tarea) =>
-        tarea.id === id ? { ...tarea, completada: true } : tarea
-      )
-    )
-  }
+  const handleConfirmarEliminacion = () => {
+    eliminarTarea(tareaAEliminar);
+    setTareaAEliminar(null);
+  };
 
   return (
     <div className="app-container">
       <Header title="TaskCampus" description="Gestiona tus tareas académicas" />
-      <Card titulo="Resumen de Tareas"> 
-        <TaskSumary total={tareas.length} />
-      </Card>
-      <TaskForm onAgregar={agregarTarea} />
-      <Card titulo='Mis Tareas'>
-      <TaskList tareas={tareas} onCompletar={completarTarea} cargando={cargando} error={error} />
-      </Card>
-    </div>
-  )
-}
 
-export default App
+      <Card titulo="Resumen de tareas">
+        <TaskSummary
+          total={tareas.length}
+          completadas={tareas.filter((t) => t.completada).length}
+          pendientes={tareas.filter((t) => !t.completada).length}
+          // NUEVO: datos derivados del filtro
+          mostrando={tareasFiltradas.length}
+          filtroActual={filtro}
+        />
+      </Card>
+
+      <TaskForm onAgregar={handleAgregarTarea} />
+
+      {cargando && <p className="estado-carga">⏳ Cargando tareas...</p>}
+      {error && <p className="estado-error">⚠️ Error: {error}</p>}
+
+      {!cargando && !error && (
+        <Card titulo="Mis tareas">
+          <TaskList
+            // Ahora la lista ya viene filtrada desde App
+            tareas={tareasFiltradas}
+            // Filtro y setter levantados a App
+            filtro={filtro}
+            onCambiarFiltro={setFiltro}
+            // Toggle levantado a App
+            onToggle={handleToggleCompletada}
+            onEliminar={setTareaAEliminar}
+          />
+        </Card>
+      )}
+
+      <Modal
+        visible={tareaAEliminar !== null}
+        mensaje="¿Seguro que deseas eliminar esta tarea? Esta acción no se puede deshacer."
+        onConfirmar={handleConfirmarEliminacion}
+        onCancelar={() => setTareaAEliminar(null)}
+      />
+    </div>
+  );
+};
+
+export default App;
