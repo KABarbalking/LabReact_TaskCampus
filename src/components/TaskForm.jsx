@@ -1,39 +1,40 @@
-import { useState } from "react"
+import { useState } from "react";
+import Button from "./Button";
 
 const TaskForm = ({ onAgregar }) => {
-  const [titulo, setTitulo] = useState("")
-  const [error, setError] = useState("")
+  const [titulo, setTitulo] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // Validación: si el título está vacío o solo tiene espacios
-    if (titulo.trim() === "") {
-      setError("El título de la tarea no puede estar vacío.")
-      return
+    if (titulo.trim().length < 3) {
+      setError("El título debe tener al menos 3 caracteres.");
+      return;
     }
 
-    onAgregar(titulo.trim())
-    setTitulo("")
-    setError("")
-  }
+    onAgregar(titulo.trim());
+    setTitulo("");
+    setError("");
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="card">
+    <div className="card">
       <h2 className="section-title">Agregar Nueva Tarea</h2>
-      <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+      <form onSubmit={handleSubmit} className="task-form">
         <input
           type="text"
           value={titulo}
           onChange={(e) => setTitulo(e.target.value)}
-          placeholder="Ej: Estudiar para prueba de Bases de Datos"
-          style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
+          placeholder="Escribe el título de la tarea..."
+          className="task-input"
         />
-        <button type="submit" className="task-button">Agregar</button>
-      </div>
-      {error && <p style={{ color: "red", fontSize: "0.875rem" }}>{error}</p>}
-    </form>
-  )
-}
+        <Button label="Agregar" variant="primary" />
+      </form>
 
-export default TaskForm
+      {error && <p className="form-error">{error}</p>}
+    </div>
+  );
+};
+
+export default TaskForm;
