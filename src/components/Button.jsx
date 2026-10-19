@@ -1,4 +1,4 @@
-const Button = ({ text, onClick, variant = "primary" , disabled = false }) => {
+const Button = ({ label, onClick, variant = "primary", disabled = false }) => {
     return (
         <button
             className={`btn btn-${variant}`}
