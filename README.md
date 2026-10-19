@@ -44,6 +44,16 @@ Sigue estos pasos para clonar, instalar y ejecutar el proyecto localmente:
 
 * TaskForm.jsx: Formulario controlado con validación de campos vacíos.
 
+* Button.jsx & Modal.jsx: Componentes reutilizables de UI y confirmación.
+
+* SummaryView.jsx: Vista dedicada al resumen y contadores generales.
+
+* TasksView.jsx: Vista principal de listado, filtrado y búsqueda.
+
+* NewTaskView.jsx: Vista del formulario de creación de tareas.
+
+* services/tareasService.js: Servicio centralizado para las operaciones HTTP (GET, POST, PUT, DELETE).
+
 ---
 
 ## Funcionalidades Clave
@@ -54,3 +64,27 @@ Sigue estos pasos para clonar, instalar y ejecutar el proyecto localmente:
 3. Persistencia local (localStorage) y consumo inicial de API con fetch (JSONPlaceholder).
 
 4. Sincronización del título de la pestaña con las tareas pendientes mediante useEffect.
+
+## Investigación Aplicada
+
+1. **Navegación entre Vistas**: Uso de `useState` en `App.jsx` y renderizado condicional para alternar entre Resumen, Tareas y Nueva tarea sin recargar la página.
+2. **Estado Derivado**: Cálculo dinámico de contadores y listados filtrados mediante `.filter()` desde la colección principal, evitando redundancias.
+3. **Actualización Funcional**: Uso de `setTareas(prev => ...)` para asegurar que las operaciones actualicen siempre la versión más reciente del estado.
+4. **Identificadores y API Simulada**: Distinción entre IDs locales (`Date.now()`) y remotos de JSONPlaceholder mediante una salvaguarda en el servicio HTTP.
+
+---
+
+## Casos de Prueba Verificables
+
+| Caso | Pasos | Resultado | Evidencia |
+| :--- | :--- | :--- | :--- |
+| **RF01: Carga Inicial** | Iniciar app (`npm run dev`) | Muestra 10 tareas de la API | `tareasService.js` |
+| **RF03: Creación** | Enviar formulario con título válido | Añade la tarea sin recargar | `TaskForm.jsx` |
+| **RF05: Estado** | Alternar estado de una tarea | Actualiza la tarea y el resumen | `App.jsx` |
+| **RF06: Edición** | Editar título de tarea | Actualiza tras validar contenido | Componente edición |
+| **RF07: Eliminación** | Confirmar eliminación en el modal | Retira la tarea de la lista | `Modal.jsx` |
+| **RF08: Filtros** | Usar filtros de estado | Muestra solo tareas coincidentes | `TasksView.jsx` |
+| **RF13: Navegación** | Cambiar de vista en la barra | Mantiene los datos de la sesión | `Navigation.jsx` |
+
+## Limitaciones de la API
+Las operaciones de escritura usan **JSONPlaceholder** como API simulada; los cambios son reactivos en la sesión pero no persisten permanentemente tras recargar la página.
