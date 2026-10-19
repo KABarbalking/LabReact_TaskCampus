@@ -52,6 +52,10 @@ const App = () => {
     actualizarTarea(id, { completada: !completadaActual });
   };
 
+  const handleEditarTarea = (id, nuevoTitulo) => {
+    actualizarTarea(id, { titulo: nuevoTitulo });
+  };
+
   const handleConfirmarEliminacion = () => {
     eliminarTarea(tareaAEliminar);
     setTareaAEliminar(null);
@@ -66,7 +70,6 @@ const App = () => {
           total={tareas.length}
           completadas={tareas.filter((t) => t.completada).length}
           pendientes={tareas.filter((t) => !t.completada).length}
-          // NUEVO: datos derivados del filtro
           mostrando={tareasFiltradas.length}
           filtroActual={filtro}
         />
@@ -80,14 +83,12 @@ const App = () => {
       {!cargando && !error && (
         <Card titulo="Mis tareas">
           <TaskList
-            // Ahora la lista ya viene filtrada desde App
             tareas={tareasFiltradas}
-            // Filtro y setter levantados a App
             filtro={filtro}
             onCambiarFiltro={setFiltro}
-            // Toggle levantado a App
             onToggle={handleToggleCompletada}
             onEliminar={setTareaAEliminar}
+            onEditar={handleEditarTarea}
           />
         </Card>
       )}
